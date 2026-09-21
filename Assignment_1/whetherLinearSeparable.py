@@ -5,6 +5,7 @@ from scipy.optimize import linprog
 import matplotlib
 import matplotlib.pyplot as plt
 
+
 def _validate_labelled_data(X):
     """Return X as a checked floating-point array."""
     try:
@@ -26,6 +27,7 @@ def _validate_labelled_data(X):
         raise ValueError("The last column of X must contain only +1 or -1.")
 
     return data
+
 
 def _solve_separating_hyperplane(data):
     """Solve for theta = [w_1, ..., w_d, b] when a separator exists."""
@@ -50,6 +52,7 @@ def _solve_separating_hyperplane(data):
         bounds=bounds,
         method="highs",
     )
+
 
 def whetherLinearSeparable(X):
     """Return 1 if the labelled samples are linearly separable, otherwise -1.
@@ -78,6 +81,7 @@ def whetherLinearSeparable(X):
         return -1
 
     raise RuntimeError("The linear-programming solver failed: " + result.message)
+
 
 def plotLinearSeparable(X, pdf_path="linear_separable.pdf"):
     """Plot labelled 2D or 3D samples and save the figure as a PDF."""
@@ -156,6 +160,7 @@ def plotLinearSeparable(X, pdf_path="linear_separable.pdf"):
 
     return pdf_path
 
+
 if __name__ == "__main__":
     # Example 1
     Example_1 = np.array(
@@ -171,21 +176,14 @@ if __name__ == "__main__":
             [-4.1, 2.2, 1],
             [1.4, 4.3, 1],
             [-2.4, 4.0, 1],
-            [-8.4, -5, 1]
+            [-8.4, -5, 1],
         ]
     )
     # Example 2
     Example_2 = Example_1.copy()
     Example_2[2, -1] = 1
     # Example 3
-    Example_3 = np.array(
-        [
-            [0, 0, -1],
-            [0, 1, 1],
-            [1, 0, 1],
-            [1, 1, -1]
-        ]
-    )
+    Example_3 = np.array([[0, 0, -1], [0, 1, 1], [1, 0, 1], [1, 1, -1]])
     # Example 4
     Example_4 = np.array(
         [
@@ -194,23 +192,16 @@ if __name__ == "__main__":
             [3, 3, 3, 1],
             [-1, -1, -1, -1],
             [-2, -2, -2, -1],
-            [-3, -3, -3, -1]
+            [-3, -3, -3, -1],
         ]
     )
     # Example 5
-    Example_5 = np.array(
-        [
-            [0, 0, 1],
-            [0, 0, -1],
-            [1, 1, 1],
-            [1, 1, -1]
-        ]
-    )
+    Example_5 = np.array([[0, 0, 1], [0, 0, -1], [1, 1, 1], [1, 1, -1]])
     # Judge whether the labelled samples are linearly separable.
     print("Example 1 (expected 1):", whetherLinearSeparable(Example_1))
     print("Example 2 (expected -1):", whetherLinearSeparable(Example_2))
     print("Example 3 (expected -1):", whetherLinearSeparable(Example_3))
-    print("Example 4 (expected 1):", whetherLinearSeparable(Example_4)) 
+    print("Example 4 (expected 1):", whetherLinearSeparable(Example_4))
     print("Example 5 (expected -1):", whetherLinearSeparable(Example_3))
     # Plot the labelled samples and save the figures as PDF files.
     print("Saved figure:", plotLinearSeparable(Example_1, "Example_1.pdf"))
