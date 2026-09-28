@@ -1,2 +1,11 @@
 # venv
 .venv/
+__pycache__/
+
+# Assignment_1
+Assignment_1/*.pdf
+
+# Assignment_2
+MNIST/
+storedNN.npz
+ROC.png

@@ -13,19 +13,22 @@ import numpy as np
 import pickle
 import os
 
-def save_variable(v,filename):
-    f=open(filename,'wb')
-    pickle.dump(v,f)
+
+def save_variable(v, filename):
+    f = open(filename, "wb")
+    pickle.dump(v, f)
     f.close()
     return filename
 
+
 def load_variable(filename):
-    f=open(filename,'rb')
-    r=pickle.load(f)
+    f = open(filename, "rb")
+    r = pickle.load(f)
     f.close()
     return r
 
-filename = 'krkopt.data'
+
+filename = "krkopt.data"
 fr = open(filename)
 arrayOLines = fr.readlines()
 del arrayOLines[0]
@@ -35,23 +38,27 @@ data = np.zeros((numberOfLines, numberOfDimension), dtype=float)
 label = np.zeros((numberOfLines, 2), dtype=float)
 for index in range(len(arrayOLines)):
     line = arrayOLines[index]
-    listFromLine = line.split(',')
-    data[index, 0] = ord(listFromLine[0])-96
+    listFromLine = line.split(",")
+    data[index, 0] = ord(listFromLine[0]) - 96
     data[index, 1] = ord(listFromLine[1]) - 48
-    data[index, 2] = ord(listFromLine[2])-96
+    data[index, 2] = ord(listFromLine[2]) - 96
     data[index, 3] = ord(listFromLine[3]) - 48
-    data[index, 4] = ord(listFromLine[4])-96
+    data[index, 4] = ord(listFromLine[4]) - 96
     data[index, 5] = ord(listFromLine[5]) - 48
-    if listFromLine[6] == 'draw\n':
-        label[index,:] = np.array([1,0])
+    if listFromLine[6] == "draw\n":
+        label[index, :] = np.array([1, 0])
     else:
-        label[index,:] = np.array([0,1])
+        label[index, :] = np.array([0, 1])
 
 ratioTraining = 0.4
 ratioValidation = 0.1
 ratioTesting = 0.5
-xTraining, xTesting, yTraining, yTesting = train_test_split(data, label, test_size=1 - ratioTraining, random_state=1)  # 随机分配数据集
-xTesting, xValidation, yTesting, yValidation = train_test_split(xTesting, yTesting, test_size=ratioValidation / ratioTesting, random_state=1)
+xTraining, xTesting, yTraining, yTesting = train_test_split(
+    data, label, test_size=1 - ratioTraining, random_state=1
+)  # 随机分配数据集
+xTesting, xValidation, yTesting, yValidation = train_test_split(
+    xTesting, yTesting, test_size=ratioValidation / ratioTesting, random_state=1
+)
 
 scaler = StandardScaler(copy=False)
 scaler.fit(xTraining)
@@ -59,44 +66,52 @@ scaler.transform(xTraining)
 scaler.transform(xTesting)
 scaler.transform(xValidation)
 
-nn = NN(layer=[6, 20, 20, 20, 20, 2],active_function='sigmoid',batch_size = 100,learning_rate = 0.01,optimization_method='Momentum', batch_normalization = 1, objective_function='Cross Entropy')
+nn = NN(
+    layer=[6, 20, 20, 20, 20, 2],
+    active_function="sigmoid",
+    batch_size=100,
+    learning_rate=0.01,
+    optimization_method="Momentum",
+    batch_normalization=1,
+    objective_function="Cross Entropy",
+)
 epoch = 0
 maxAccuracy = 0
 totalAccuracy = []
 totalCost = []
 maxEpoches = 100
 for epoch in range(maxEpoches):
-#    epoch +=1
+    #    epoch +=1
     nn = nn_train(nn, xTraining, yTraining)
     totalCost.append(sum(nn.cost.values()) / len(nn.cost.values()))
-    _, _, accuracy,_ = nn_test(nn, xValidation, yValidation)
+    _, _, accuracy, _ = nn_test(nn, xValidation, yValidation)
     totalAccuracy.append(accuracy)
     if accuracy > maxAccuracy:
         maxAccuracy = accuracy
-        save_variable(nn, 'storedNN.npz')
+        save_variable(nn, "storedNN.npz")
     cost = totalCost[epoch - 1]
-    print('Epoch:',epoch)
-    print('Accuracy:',accuracy)
-    print('Cost:',totalCost[epoch - 1])
+    print("Epoch:", epoch)
+    print("Accuracy:", accuracy)
+    print("Cost:", totalCost[epoch - 1])
 
-if os.path.exists('storedNN.npz'):
-    storedNN = load_variable('storedNN.npz')
+if os.path.exists("storedNN.npz"):
+    storedNN = load_variable("storedNN.npz")
     wrongs, yPred, accuracy, yOutput = nn_test(storedNN, xTesting, yTesting)
-    decisionValues = yOutput[:,0]
-    print('Accuracy on Testset:', accuracy)
-    truePositive,trueNegative,falsePositive,falseNegative = 0,0,0,0
+    decisionValues = yOutput[:, 0]
+    print("Accuracy on Testset:", accuracy)
+    truePositive, trueNegative, falsePositive, falseNegative = 0, 0, 0, 0
     for i in range(len(yPred)):
-        if np.argmax(yTesting[i,:])==0:
-            if yPred[i]==0:
-                truePositive+=1
+        if np.argmax(yTesting[i, :]) == 0:
+            if yPred[i] == 0:
+                truePositive += 1
             else:
-                falseNegative+=1
+                falseNegative += 1
         else:
             if yPred[i] == 0:
                 falsePositive += 1
             else:
                 trueNegative += 1
-    print(truePositive,trueNegative,falsePositive,falseNegative)
+    print(truePositive, trueNegative, falsePositive, falseNegative)
     totalScores = sorted(decisionValues)
     index = sorted(range(len(decisionValues)), key=decisionValues.__getitem__)
     labels = np.zeros(len(yTesting))
@@ -123,6 +138,4 @@ if os.path.exists('storedNN.npz'):
     ax = fig.add_subplot(111)
     ax.plot(falsePositive, truePositive)
     plt.show()
-    plt.savefig('ROC.png')
-
-
+    plt.savefig("ROC.png")
