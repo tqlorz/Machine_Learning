@@ -1,5 +1,9 @@
 import numpy as np
 
+RMSPROP_DECAY = 0.9
+NESTEROV_MOMENTUM = 0.9
+OPTIMIZER_EPSILON = 1e-8
+
 
 def nn_applygradient(nn):
     method = nn.optimization_method
@@ -73,6 +77,24 @@ def nn_applygradient(nn):
                 nn.b[k] = nn.b[k] - nn.learning_rate * newS / np.sqrt(
                     newR + 0.00001
                 )  # rho1 = 0.9, rho2 = 0.999, delta = 0.00001
+
+            elif method == "RMSPropNesterov":
+                rho = RMSPROP_DECAY
+                alpha = NESTEROV_MOMENTUM
+                nn.rW[k] = rho * nn.rW[k] + (1 - rho) * nn.W_grad[k] ** 2
+                nn.rb[k] = rho * nn.rb[k] + (1 - rho) * nn.b_grad[k] ** 2
+
+                # Parameters currently contain theta + alpha*v_old.
+                nn.W[k] = nn.W[k] - alpha * nn.vW[k]
+                nn.b[k] = nn.b[k] - alpha * nn.vb[k]
+                nn.vW[k] = alpha * nn.vW[k] - nn.learning_rate * nn.W_grad[k] / (
+                    np.sqrt(nn.rW[k]) + OPTIMIZER_EPSILON
+                )
+                nn.vb[k] = alpha * nn.vb[k] - nn.learning_rate * nn.b_grad[k] / (
+                    np.sqrt(nn.rb[k]) + OPTIMIZER_EPSILON
+                )
+                nn.W[k] = nn.W[k] + nn.vW[k]
+                nn.b[k] = nn.b[k] + nn.vb[k]
 
         else:
             if method == "normal":
@@ -156,4 +178,35 @@ def nn_applygradient(nn):
                 nn.Beta[k] = nn.Beta[k] - nn.learning_rate * newS / np.sqrt(
                     newR + 0.00001
                 )
+
+            elif method == "RMSPropNesterov":
+                rho = RMSPROP_DECAY
+                alpha = NESTEROV_MOMENTUM
+                nn.rW[k] = rho * nn.rW[k] + (1 - rho) * nn.W_grad[k] ** 2
+                nn.rb[k] = rho * nn.rb[k] + (1 - rho) * nn.b_grad[k] ** 2
+                nn.rGamma[k] = rho * nn.rGamma[k] + (1 - rho) * nn.Gamma_grad[k] ** 2
+                nn.rBeta[k] = rho * nn.rBeta[k] + (1 - rho) * nn.Beta_grad[k] ** 2
+
+                # Parameters currently contain theta + alpha*v_old.
+                nn.W[k] = nn.W[k] - alpha * nn.vW[k]
+                nn.b[k] = nn.b[k] - alpha * nn.vb[k]
+                nn.Gamma[k] = nn.Gamma[k] - alpha * nn.vGamma[k]
+                nn.Beta[k] = nn.Beta[k] - alpha * nn.vBeta[k]
+                nn.vW[k] = alpha * nn.vW[k] - nn.learning_rate * nn.W_grad[k] / (
+                    np.sqrt(nn.rW[k]) + OPTIMIZER_EPSILON
+                )
+                nn.vb[k] = alpha * nn.vb[k] - nn.learning_rate * nn.b_grad[k] / (
+                    np.sqrt(nn.rb[k]) + OPTIMIZER_EPSILON
+                )
+                nn.vGamma[k] = alpha * nn.vGamma[k] - nn.learning_rate * nn.Gamma_grad[
+                    k
+                ] / (np.sqrt(nn.rGamma[k]) + OPTIMIZER_EPSILON)
+                nn.vBeta[k] = alpha * nn.vBeta[k] - nn.learning_rate * nn.Beta_grad[
+                    k
+                ] / (np.sqrt(nn.rBeta[k]) + OPTIMIZER_EPSILON)
+                nn.W[k] = nn.W[k] + nn.vW[k]
+                nn.b[k] = nn.b[k] + nn.vb[k]
+                nn.Gamma[k] = nn.Gamma[k] + nn.vGamma[k]
+                nn.Beta[k] = nn.Beta[k] + nn.vBeta[k]
+
     return nn

@@ -76,11 +76,11 @@ class NN:
                 ) - 1 / np.sqrt(width)
             method = self.optimization_method
 
-            if method == "Momentum":
+            if method in ("Momentum", "RMSPropNesterov"):
                 self.vW[k] = np.zeros((height, width), dtype=float)
                 self.vb[k] = np.zeros((height, 1), dtype=float)
 
-            if method == "AdaGrad" or method == "RMSProp" or method == "Adam":
+            if method in ("AdaGrad", "RMSProp", "Adam", "RMSPropNesterov"):
                 self.rW[k] = np.zeros((height, width), dtype=float)
                 self.rb[k] = np.zeros((height, 1), dtype=float)
 
@@ -96,14 +96,16 @@ class NN:
                 self.Beta[k] = 0
                 self.vecNum = 0
                 if method == "Momentum":
-                    self.vGamma[k] = 1
+                    self.vGamma[k] = 0
+                    self.vBeta[k] = 0
+                elif method == "RMSPropNesterov":
+                    self.vGamma[k] = 0
                     self.vBeta[k] = 0
 
-                if method == "AdaGrad" or method == "RMSProp" or method == "Adam":
-                    self.rW[k] = np.zeros((height, width), dtype=float)
-                    self.rb[k] = np.zeros((height, 1), dtype=float)
+                if method in ("AdaGrad", "RMSProp", "Adam", "RMSPropNesterov"):
                     self.rGamma[k] = 0
                     self.rBeta[k] = 0
+
                 if method == "Adam":
                     self.sGamma[k] = 1
                     self.sBeta[k] = 0

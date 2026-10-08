@@ -1,4 +1,4 @@
-# venv
+# python
 .venv/
 __pycache__/
 
@@ -7,5 +7,8 @@ Assignment_1/*.pdf
 
 # Assignment_2
 MNIST/
-storedNN.npz
+storedMNIST.pkl
+storedChess.pkl
+storedChess_Momentum.pkl
+storedChess_RMSPropNesterov.pkl
 ROC.png

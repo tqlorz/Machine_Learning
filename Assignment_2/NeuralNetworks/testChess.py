@@ -28,7 +28,9 @@ def load_variable(filename):
     return r
 
 
-filename = "krkopt.data"
+base_path = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(base_path, "storedChess.pkl")
+filename = os.path.join(base_path, "krkopt.data")
 fr = open(filename)
 arrayOLines = fr.readlines()
 del arrayOLines[0]
@@ -88,14 +90,14 @@ for epoch in range(maxEpoches):
     totalAccuracy.append(accuracy)
     if accuracy > maxAccuracy:
         maxAccuracy = accuracy
-        save_variable(nn, "storedNN.npz")
+        save_variable(nn, model_path)
     cost = totalCost[epoch - 1]
     print("Epoch:", epoch)
     print("Accuracy:", accuracy)
     print("Cost:", totalCost[epoch - 1])
 
-if os.path.exists("storedNN.npz"):
-    storedNN = load_variable("storedNN.npz")
+if os.path.exists(model_path):
+    storedNN = load_variable(model_path)
     wrongs, yPred, accuracy, yOutput = nn_test(storedNN, xTesting, yTesting)
     decisionValues = yOutput[:, 0]
     print("Accuracy on Testset:", accuracy)
@@ -137,5 +139,4 @@ if os.path.exists("storedNN.npz"):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(falsePositive, truePositive)
-    plt.show()
     plt.savefig("ROC.png")
