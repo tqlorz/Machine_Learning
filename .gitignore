@@ -17,3 +17,6 @@ ROC.png
 CIFAR10/
 
 # Assignment_4
+datasets/
+*.pkl
+test_lst.csv
